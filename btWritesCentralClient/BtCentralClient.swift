@@ -50,6 +50,7 @@ extension SharedBtClient: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
 
         peripherals.append(peripheral)
+
         centralManager?.connect(peripheral, options: nil)
     }
 
@@ -58,13 +59,36 @@ extension SharedBtClient: CBCentralManagerDelegate {
 //        let permissions: CBAttributePermissions = [.readable, .writeable]
 //        let characteristic = CBMutableCharacteristic(type: uuid, properties: properties, value: nil, permissions: permissions)
 
+        peripheral.delegate = self
         peripheral.discoverServices([uuid])
+    }
+}
 
-//        let characteristic = peripheral.services?.first(where: { $0.characteristics?.first?.uuid == uuid })?.characteristics?.first
-//        peripheral.writeValue(Data(), for: characteristic!, type: CBCharacteristicWriteType.withResponse)
+extension SharedBtClient: CBPeripheralDelegate {
+
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+
+        guard let services = peripheral.services,
+            services.count > 0 else {
+            print("Empty services")
+            return
+        }
+
+        peripheral.discoverCharacteristics([uuid], for: services.first!)
+        print(services)
     }
 
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics,
+            characteristics.count > 0 else {
+            print("empty charaterstics")
+            return
+        }
+        peripheral.writeValue(Data(bytes:[0xEE, 0xEE]), for: characteristics.first!, type: CBCharacteristicWriteType.withResponse)
+    }
 
-
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
+        print(descriptor)
+    }
 }
 

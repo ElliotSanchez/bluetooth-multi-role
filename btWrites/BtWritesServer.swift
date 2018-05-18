@@ -28,10 +28,10 @@ extension SharedBtServer {
 
     fileprivate func setupAndAdvertiseService() {
 
-        let service = CBMutableService(type: uuid, primary: false)
+        let service = CBMutableService(type: uuid, primary: true)
         let properties = CBCharacteristicProperties.authenticatedSignedWrites
         let permissions: CBAttributePermissions = [.readable, .writeable]
-        let characteristic = CBMutableCharacteristic(type: uuid, properties: properties, value: nil, permissions: permissions)
+        let characteristic = CBMutableCharacteristic(type: uuid, properties: properties, value: Data(bytes: [0x0F, 0x0F]), permissions: permissions)
 
         service.characteristics?.append(characteristic)
         peripheralManager?.add(service)

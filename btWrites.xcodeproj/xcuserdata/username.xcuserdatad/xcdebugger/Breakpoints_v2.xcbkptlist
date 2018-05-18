@@ -10,12 +10,44 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "btWrites/BtWritesServer.swift"
-            timestampString = "548368660.304564"
+            timestampString = "548371775.9379669"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "61"
             endingLineNumber = "61"
             landmarkName = "peripheralManager(_:didReceiveWrite:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "btWritesCentralClient/BtCentralClient.swift"
+            timestampString = "548371775.9383841"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "82"
+            endingLineNumber = "82"
+            landmarkName = "peripheral(_:didDiscoverCharacteristicsFor:error:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "btWritesCentralClient/BtCentralClient.swift"
+            timestampString = "548371775.9386899"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
+            landmarkName = "peripheral(_:didWriteValueFor:error:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
