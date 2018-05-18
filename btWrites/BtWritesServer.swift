@@ -10,6 +10,7 @@ struct BtServer {
 class SharedBtServer: NSObject {
 
     var peripheralManager: CBPeripheralManager?
+    let uuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF0")
 
     func start() {
 
@@ -27,16 +28,13 @@ extension SharedBtServer {
 
     fileprivate func setupAndAdvertiseService() {
 
-        let uuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF0")
-        let service = CBMutableService(type: uuid, primary: true)
+        let service = CBMutableService(type: uuid, primary: false)
         let properties = CBCharacteristicProperties.authenticatedSignedWrites
-        let permissions = CBAttributePermissions.writeable
+        let permissions: CBAttributePermissions = [.readable, .writeable]
         let characteristic = CBMutableCharacteristic(type: uuid, properties: properties, value: nil, permissions: permissions)
 
         service.characteristics?.append(characteristic)
         peripheralManager?.add(service)
-
-        peripheralManager?.startAdvertising(["NAME" : CBAdvertisementDataLocalNameKey])
     }
 
     fileprivate func stopAdvertisingAndTeardownService() {
@@ -57,6 +55,15 @@ extension SharedBtServer: CBPeripheralManagerDelegate {
 
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
         print("Advertising - state \(peripheral.state.rawValue)")
+    }
+
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        print("Request to write \(requests)")
+    }
+
+    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+        let advertisingData = [CBAdvertisementDataServiceUUIDsKey: [uuid]]
+        peripheralManager?.startAdvertising(advertisingData)
     }
 }
 
