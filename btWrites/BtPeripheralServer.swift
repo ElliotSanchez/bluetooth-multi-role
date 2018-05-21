@@ -58,10 +58,12 @@ extension SharedBtServer: CBPeripheralManagerDelegate {
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        print("Request to write \(requests)")
+        print("\(#function) Request to write \(requests)")
+        peripheral.respond(to: requests[0], withResult: CBATTError.success)
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+        //print("\(#function) \(requests)")
         let advertisingData = [CBAdvertisementDataServiceUUIDsKey: [uuid]]
         peripheralManager?.startAdvertising(advertisingData)
     }

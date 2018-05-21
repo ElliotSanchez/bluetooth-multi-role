@@ -14,7 +14,7 @@
 		3DF7C23720AF396A00340C8D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DF7C23520AF396A00340C8D /* LaunchScreen.storyboard */; };
 		3DF7C24220AF396A00340C8D /* btWritesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7C24120AF396A00340C8D /* btWritesTests.swift */; };
 		3DF7C24D20AF396A00340C8D /* btWritesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7C24C20AF396A00340C8D /* btWritesUITests.swift */; };
-		3DF7C25B20AF3A3D00340C8D /* BtWritesServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7C25A20AF3A3D00340C8D /* BtWritesServer.swift */; };
+		3DF7C25B20AF3A3D00340C8D /* BtPeripheralServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7C25A20AF3A3D00340C8D /* BtPeripheralServer.swift */; };
 		3DF7C26320AF626400340C8D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7C26220AF626400340C8D /* AppDelegate.swift */; };
 		3DF7C26520AF626400340C8D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7C26420AF626400340C8D /* ViewController.swift */; };
 		3DF7C26820AF626400340C8D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DF7C26620AF626400340C8D /* Main.storyboard */; };
@@ -72,7 +72,7 @@
 		3DF7C24820AF396A00340C8D /* btWritesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = btWritesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DF7C24C20AF396A00340C8D /* btWritesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = btWritesUITests.swift; sourceTree = "<group>"; };
 		3DF7C24E20AF396A00340C8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3DF7C25A20AF3A3D00340C8D /* BtWritesServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BtWritesServer.swift; sourceTree = "<group>"; };
+		3DF7C25A20AF3A3D00340C8D /* BtPeripheralServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BtPeripheralServer.swift; sourceTree = "<group>"; };
 		3DF7C26020AF626400340C8D /* btWritesCentralClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = btWritesCentralClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DF7C26220AF626400340C8D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3DF7C26420AF626400340C8D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -169,7 +169,7 @@
 			isa = PBXGroup;
 			children = (
 				3DF7C22C20AF396800340C8D /* AppDelegate.swift */,
-				3DF7C25A20AF3A3D00340C8D /* BtWritesServer.swift */,
+				3DF7C25A20AF3A3D00340C8D /* BtPeripheralServer.swift */,
 				3DF7C22E20AF396800340C8D /* ViewController.swift */,
 				3DF7C23020AF396800340C8D /* Main.storyboard */,
 				3DF7C23320AF396A00340C8D /* Assets.xcassets */,
@@ -465,7 +465,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DF7C22F20AF396800340C8D /* ViewController.swift in Sources */,
-				3DF7C25B20AF3A3D00340C8D /* BtWritesServer.swift in Sources */,
+				3DF7C25B20AF3A3D00340C8D /* BtPeripheralServer.swift in Sources */,
 				3DF7C22D20AF396800340C8D /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

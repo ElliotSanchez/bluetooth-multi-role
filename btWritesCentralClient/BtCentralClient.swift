@@ -74,8 +74,21 @@ extension SharedBtClient: CBPeripheralDelegate {
             return
         }
 
-        peripheral.discoverCharacteristics([uuid], for: services.first!)
         print(services)
+
+
+        for targetService in services {
+            if targetService.uuid == uuid {
+
+
+                var targetCharacteristics: [CBUUID] = []
+                for characteristic in targetService.characteristics! {
+                    targetCharacteristics.append(characteristic.uuid)
+                }
+
+                peripheral.discoverCharacteristics(targetCharacteristics, for: services.first!)
+            }
+        }
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
