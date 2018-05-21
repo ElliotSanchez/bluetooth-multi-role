@@ -11,7 +11,8 @@ struct BtClient {
 class SharedBtClient: NSObject {
 
     var centralManager: CBCentralManager?
-    let uuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF0")
+    let serviceUuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF0")
+    //let characteristicUuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF1")
     var peripherals: [CBPeripheral] = []
 
     func start() {
@@ -29,7 +30,7 @@ class SharedBtClient: NSObject {
 extension SharedBtClient {
 
     fileprivate func searchAndWriteToService() {
-        centralManager?.scanForPeripherals(withServices: [uuid], options: nil)
+        centralManager?.scanForPeripherals(withServices: [serviceUuid], options: nil)
     }
 
     fileprivate func stopSearchingForService() {
@@ -60,7 +61,7 @@ extension SharedBtClient: CBCentralManagerDelegate {
 //        let characteristic = CBMutableCharacteristic(type: uuid, properties: properties, value: nil, permissions: permissions)
 
         peripheral.delegate = self
-        peripheral.discoverServices([uuid])
+        peripheral.discoverServices([serviceUuid])
     }
 }
 
@@ -76,32 +77,40 @@ extension SharedBtClient: CBPeripheralDelegate {
 
         print(services)
 
-
-        for targetService in services {
-            if targetService.uuid == uuid {
-
-
-                var targetCharacteristics: [CBUUID] = []
-                for characteristic in targetService.characteristics! {
-                    targetCharacteristics.append(characteristic.uuid)
-                }
-
-                peripheral.discoverCharacteristics(targetCharacteristics, for: services.first!)
-            }
-        }
+        peripheral.discoverCharacteristics(nil, for: services[0])
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard let characteristics = service.characteristics,
-            characteristics.count > 0 else {
-            print("empty charaterstics")
+
+        print(service.characteristics.debugDescription)
+
+        guard let characteristics = service.characteristics else {
+            print("No characteristics")
             return
         }
-        peripheral.writeValue(Data(bytes:[0xEE, 0xEE]), for: characteristics.first!, type: CBCharacteristicWriteType.withResponse)
+
+        print("\(#function) - About to attempt overwrite \(service.characteristics?.first?.descriptors?.first?.value.debugDescription)")
+
+        peripheral.readValue(for: characteristics.first!)
+        peripheral.writeValue(Data(bytes:[0xEE]), for: characteristics.first!, type: CBCharacteristicWriteType.withResponse)
     }
 
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
-        print(descriptor)
+        print("\(#function) - Wrote new value \(descriptor.value.debugDescription)")
+        peripheral.readValue(for: descriptor)
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
+        print("\(#function) - Wrote new value \(descriptor.value.debugDescription)")
+        peripheral.readValue(for: descriptor)
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        print("\(#function) - Wrote new value \(invalidatedServices.first?.characteristics?.first?.descriptors?.first?.value.debugDescription)")
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        print("\(#function) - characteristic value \(characteristic.value?.debugDescription)")
     }
 }
 

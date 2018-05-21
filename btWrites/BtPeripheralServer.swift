@@ -10,7 +10,8 @@ struct BtServer {
 class SharedBtServer: NSObject {
 
     var peripheralManager: CBPeripheralManager?
-    let uuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF0")
+    let serviceUuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF0")
+    let characteristicUuid = CBUUID(string: "0FFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFF1")
 
     func start() {
 
@@ -28,12 +29,14 @@ extension SharedBtServer {
 
     fileprivate func setupAndAdvertiseService() {
 
-        let service = CBMutableService(type: uuid, primary: true)
-        let properties = CBCharacteristicProperties.authenticatedSignedWrites
+        let service = CBMutableService(type: serviceUuid, primary: true)
+        let properties: CBCharacteristicProperties = [CBCharacteristicProperties.write, .notify, .read]
         let permissions: CBAttributePermissions = [.readable, .writeable]
-        let characteristic = CBMutableCharacteristic(type: uuid, properties: properties, value: Data(bytes: [0x0F, 0x0F]), permissions: permissions)
+        let characteristic = CBMutableCharacteristic(type: characteristicUuid, properties: properties, value: nil, permissions: permissions)
 
-        service.characteristics?.append(characteristic)
+        var characteristicArray: [CBMutableCharacteristic] = []
+        characteristicArray.append(characteristic)
+        service.characteristics = characteristicArray
         peripheralManager?.add(service)
     }
 
@@ -63,9 +66,13 @@ extension SharedBtServer: CBPeripheralManagerDelegate {
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
-        //print("\(#function) \(requests)")
-        let advertisingData = [CBAdvertisementDataServiceUUIDsKey: [uuid]]
+        let advertisingData = [CBAdvertisementDataServiceUUIDsKey: [serviceUuid]]
         peripheralManager?.startAdvertising(advertisingData)
+    }
+
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        print("didRecieveRead")
+
     }
 }
 
