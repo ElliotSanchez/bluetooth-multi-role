@@ -13,15 +13,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
 
-        BtClient.shared.start()
+        BtHybridServer.shared.start()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
 
-        BtClient.shared.stop()
+        BtHybridServer.shared.stop()
     }
-
-
-
 }
 
