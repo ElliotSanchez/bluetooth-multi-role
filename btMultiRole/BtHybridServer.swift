@@ -86,7 +86,7 @@ extension SharedBtHybridServer: CBPeripheralManagerDelegate {
             return
         }
 
-        logger.log("\(#function) service: 7EE9A244-52CC-41C5-B727-F4271EF5D05A")
+        logger.log("peripheralManager didAddService: 7EE9A244-52CC-41C5-B727-F4271EF5D05A")
         logger.log("peripheralManger.isadvertising = \(peripheralManager?.isAdvertising ?? false ? "true" : "false")")
 
         setupCentralManager()
@@ -119,11 +119,17 @@ extension SharedBtHybridServer: CBPeripheralManagerDelegate {
 extension SharedBtHybridServer: CBCentralManagerDelegate {
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        logger.log("\(#function) \(central.state == CBManagerState.poweredOn ? "poweredOn" : "not available")")
+        let centralManager = central //fix Apple's naming
+        logger.log("\(#function) \(centralManager.state == CBManagerState.poweredOn ? "poweredOn" : "not available")")
 
-        if central.state == CBManagerState.poweredOn && savedPeripherals.isEmpty {
+        guard centralManager.state == CBManagerState.poweredOn else { return }
+
+        if savedPeripherals.isEmpty {
             logger.log("Starting scanForPeripherals because no peripherals are saved...")
-            centralManager?.scanForPeripherals(withServices: nil, options: nil)
+            centralManager.scanForPeripherals(withServices: nil, options: nil)
+        } else if let peripheral = savedPeripherals.first {
+            logger.log("\(#function) - calling connect for \(peripheral)")
+            centralManager.connect(peripheral, options: nil)
         }
     }
 
@@ -168,10 +174,11 @@ extension SharedBtHybridServer: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        let centralManager = central //fix Apple's naming
 
         logger.log("\(#function) - calling connect for \(peripheral)")
         //Call connect because we lost connection and want to reconnect as soon as we see it again
-        central.connect(peripheral, options: nil)
+        centralManager.connect(peripheral, options: nil)
     }
 }
 
