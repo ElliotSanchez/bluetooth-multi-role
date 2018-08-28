@@ -8,17 +8,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
+        Shared.btHybridServer.start()
         return true
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-
-        BtHybridServer.shared.start()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
+    }
 
-        BtHybridServer.shared.stop()
+    func applicationWillResignActive(_ application: UIApplication) {
+
+        Shared.btHybridServer.suspending()
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+
+        Shared.btHybridServer.suspending()
+    }
+
+    func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
+
+        Shared.btHybridServer.suspending()
     }
 }
 

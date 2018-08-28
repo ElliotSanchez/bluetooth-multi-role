@@ -1,8 +1,8 @@
 import CoreBluetooth
 
-struct BtHybridServer {
+struct Shared {
 
-    static let shared = SharedBtHybridServer()
+    static let btHybridServer = SharedBtHybridServer()
 }
 
 
@@ -14,24 +14,36 @@ class SharedBtHybridServer: NSObject {
 
     let serviceType = CBUUID(string: "7EE9A244-52CC-41C5-B727-F4271EF5D05A")
     let characteristicType = CBUUID(string: "6A782563-EF1D-4A07-98F7-17E2B0E71F6D")
+    let btMultiRoleCentralRestorationKey = "btMultiRoleCBCentralManager"
+
+    let logger = BleEventLogger()
 
     func start() {
+        logger.log("\(#function)")
 
-        //savedPeripherals = []
         peripheralManager = CBPeripheralManager()
         peripheralManager?.delegate = self
     }
 
-    func stop() {
+    func suspending() {
+        logger.log("\(#function)")
 
-        //stopAdvertisingAndTeardownService()
+        if let peripheral = savedPeripherals.first {
+            logger.log("Calling connect on resiging for \(peripheral)...")
+            centralManager?.connect(peripheral, options: nil)
+        }
+    }
+
+    func setupCentralManager() {
+        logger.log("\(#function) with attempt to restore...")
+
+        centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionRestoreIdentifierKey: btMultiRoleCentralRestorationKey])
     }
 
     fileprivate func setupService(){
 
-
-        print("\(#function)")
-        print("savedPeripherals: \(savedPeripherals)\n")
+        logger.log("\(#function)")
+        logger.log("savedPeripherals: \(savedPeripherals)\n")
         peripheralManager?.removeAllServices()
 
         let service = getAuthService()
@@ -40,6 +52,7 @@ class SharedBtHybridServer: NSObject {
     }
 
     fileprivate func getAuthService() -> CBMutableService {
+        logger.log("\(#function)")
 
         let authService = CBMutableService(type: serviceType, primary: true)
 
@@ -56,89 +69,120 @@ class SharedBtHybridServer: NSObject {
 extension SharedBtHybridServer: CBPeripheralManagerDelegate {
 
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        print("\(#function) \(peripheral.state == CBManagerState.poweredOn ? "poweredOn" : "not available")")
-        if !savedPeripherals.isEmpty {
-            print("savedPeripherals: \(savedPeripherals)\n")
-        }
+        let peripheralManager = peripheral // unhelpful name from Apple
 
-        if peripheral.state == CBManagerState.poweredOn && savedPeripherals.isEmpty {
+        logger.log("\(#function) \(peripheralManager.state == CBManagerState.poweredOn ? "poweredOn" : "not available")")
+
+        logger.log("savedPeripherals: \(savedPeripherals.isEmpty ? "isEmpty" : savedPeripherals.description)\n")
+
+        if peripheralManager.state == CBManagerState.poweredOn && savedPeripherals.isEmpty {
             setupService()
         }
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
         guard error == nil else {
-            print("‼️ Unexpected error \(error.debugDescription)")
+            logger.log("‼️ Unexpected error \(error.debugDescription)")
             return
         }
 
-        print("\(#function) service: 7EE9A244-52CC-41C5-B727-F4271EF5D05A")
-        print("peripheralManger.isadvertising = \(peripheralManager?.isAdvertising ?? false ? "true" : "false")")
+        logger.log("\(#function) service: 7EE9A244-52CC-41C5-B727-F4271EF5D05A")
+        logger.log("peripheralManger.isadvertising = \(peripheralManager?.isAdvertising ?? false ? "true" : "false")")
 
-        centralManager = CBCentralManager()
-        centralManager?.delegate = self
+        setupCentralManager()
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
-        print("❇️ \(#function): \(characteristic.uuid.uuidString)")
-        print("savedPeripherals: \(savedPeripherals)\n")
+        logger.log("❇️ \(#function): \(characteristic.uuid.uuidString)")
+        logger.log("savedPeripherals: \(savedPeripherals)\n")
     }
 
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
-        print("❌ \(#function): \(characteristic.uuid.uuidString)")
-        print("savedPeripherals: \(savedPeripherals)\n")
+        logger.log("❌ \(#function): \(characteristic.uuid.uuidString)")
+        logger.log("savedPeripherals: \(savedPeripherals)\n")
     }
 
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
-        print("🤔 \(#function)")
-        print("savedPeripherals: \(savedPeripherals)\n")
+        logger.log("🤔 \(#function)")
+        logger.log("savedPeripherals: \(savedPeripherals)\n")
     }
 
-    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {}
-    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {}
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        logger.log("\(#function)")
+    }
 
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        logger.log("\(#function)")
+    }
 }
 
 extension SharedBtHybridServer: CBCentralManagerDelegate {
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        print("\(#function) \(central.state == CBManagerState.poweredOn ? "poweredOn" : "not available")")
-        if central.state == CBManagerState.poweredOn {
-            print("Starting scanForPeripherals...")
+        logger.log("\(#function) \(central.state == CBManagerState.poweredOn ? "poweredOn" : "not available")")
+
+        if central.state == CBManagerState.poweredOn && savedPeripherals.isEmpty {
+            logger.log("Starting scanForPeripherals because no peripherals are saved...")
             centralManager?.scanForPeripherals(withServices: nil, options: nil)
         }
-
     }
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        let centralManager = central // fix Apple's naming
 
         savedPeripherals.append(peripheral)
-        guard let advName = advertisementData["kCBAdvDataLocalName"] as? String, advName == "Multi Role" else {
+        guard let advName = advertisementData[CBAdvertisementDataLocalNameKey] as? String, advName == "Multi Role" else {
             let _ = savedPeripherals.popLast()
             return
         }
 
         peripheral.delegate = self as CBPeripheralDelegate
-        print("\(#function)")
-        print("""
+        logger.log("\(#function)")
+        logger.log("""
 
             Found peripheral with name: \(peripheral.name ?? "nil")
                    kCBAdvDataLocalName: \(advName)
             """)
 
-        central.connect(peripheral, options: nil)
+        centralManager.stopScan()
+        centralManager.connect(peripheral, options: nil)
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
 
-        print("\(#function)")
+        logger.log("\(#function)")
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        print("⚠️ \(#function)")
+        logger.log("⚠️ \(#function)")
+    }
+
+    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+        logger.log("\(#function)")
+
+        if let peripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral], let peripheral = peripherals.first {
+            logger.log("ℹ️ Found saved peripheral \(peripheral)")
+            savedPeripherals.append(peripheral)
+            peripheral.delegate = self as CBPeripheralDelegate
+        }
+    }
+
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+
+        logger.log("\(#function) - calling connect for \(peripheral)")
+        //Call connect because we lost connection and want to reconnect as soon as we see it again
+        central.connect(peripheral, options: nil)
     }
 }
 
 extension SharedBtHybridServer: CBPeripheralDelegate {
 
+    
+}
+
+class BleEventLogger {
+
+    func log(_ message: String) {
+        NSLog(message)
+    }
 }
