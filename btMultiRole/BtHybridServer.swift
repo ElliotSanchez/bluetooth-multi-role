@@ -29,7 +29,7 @@ class SharedBtHybridServer: NSObject {
         logger.log("\(#function)")
 
         if let peripheral = savedPeripherals.first {
-            logger.log("Calling connect on resiging for \(peripheral)...")
+            logger.log("Calling connect on resigning for \(peripheral)...")
             centralManager?.connect(peripheral, options: nil)
         }
     }
@@ -157,6 +157,7 @@ extension SharedBtHybridServer: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
 
         logger.log("\(#function)")
+        savedPeripherals = [peripheral]
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -168,7 +169,7 @@ extension SharedBtHybridServer: CBCentralManagerDelegate {
 
         if let peripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral], let peripheral = peripherals.first {
             logger.log("ℹ️ Found saved peripheral \(peripheral)")
-            savedPeripherals.append(peripheral)
+            savedPeripherals = [peripheral]
             peripheral.delegate = self as CBPeripheralDelegate
         }
     }
